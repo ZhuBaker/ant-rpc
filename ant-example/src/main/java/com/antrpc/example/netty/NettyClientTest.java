@@ -23,9 +23,9 @@ public class NettyClientTest {
 
         TestCommonCustomBody.ComplexTestObj complexTestObj = new TestCommonCustomBody.ComplexTestObj("attr1", 2);
         TestCommonCustomBody commonCustomHeader = new TestCommonCustomBody(1, "test",complexTestObj);
-
+        // 默认创建的是请求信息 业务码是 -1
         RemotingTransporter remotingTransporter = RemotingTransporter.createRequestTransporter(TEST, commonCustomHeader);
-        RemotingTransporter request = client.invokeSync("127.0.0.1:18001", remotingTransporter, 3000);
+        RemotingTransporter request = client.invokeSync("127.0.0.1:18001", remotingTransporter, 10000);
         System.out.println(request);
     }
 

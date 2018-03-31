@@ -101,9 +101,7 @@ public class NettyRemotingServer extends NettyRemotingBase implements RemotingSe
         ThreadFactory bossFactory = new DefaultThreadFactory("netty.boss");
         ThreadFactory workerFactory = new DefaultThreadFactory("netty.worker");
 
-
         boss = initEventLoopGroup(1, bossFactory);
-
 
         if(workerNum <= 0){
             workerNum = Runtime.getRuntime().availableProcessors() << 1;
@@ -184,8 +182,6 @@ public class NettyRemotingServer extends NettyRemotingBase implements RemotingSe
             logger.error("start serverBootstrap exception [{}]",e1.getMessage());
             throw new RuntimeException("this.serverBootstrap.bind().sync() InterruptedException", e1);
         }
-
-
     }
 
     @Override

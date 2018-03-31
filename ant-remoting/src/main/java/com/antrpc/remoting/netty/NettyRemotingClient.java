@@ -64,7 +64,6 @@ public class NettyRemotingClient extends NettyRemotingBase implements RemotingCl
 
     private DefaultEventExecutorGroup defaultEventExecutorGroup;
 
-
     private final NettyClientConfig nettyClientConfig;
     private volatile int writeBufferHighWaterMark = -1;
     private volatile int writeBufferLowWaterMark = -1;
@@ -130,7 +129,6 @@ public class NettyRemotingClient extends NettyRemotingBase implements RemotingCl
 
         this.defaultEventExecutorGroup = new DefaultEventExecutorGroup(nWorkers, new ThreadFactory() {
             private AtomicInteger threadIndex = new AtomicInteger(0);
-
             @Override
             public Thread newThread(Runnable r) {
                 return new Thread(r,"NettyClientWorkerThread_" + this.threadIndex.incrementAndGet());
@@ -321,7 +319,6 @@ public class NettyRemotingClient extends NettyRemotingBase implements RemotingCl
                     // 将返回的Netty对象的ChannelFuture对象编制成一个cw
                     cw = new ChannelWrapper(channelFuture);
                     this.channelTables.put(addr, cw);
-
                 }
             }catch (Exception e){
                 logger.error("createChannel: create channel exception", e);

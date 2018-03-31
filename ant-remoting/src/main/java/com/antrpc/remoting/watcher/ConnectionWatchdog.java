@@ -51,9 +51,7 @@ public class ConnectionWatchdog extends ChannelInboundHandlerAdapter implements 
 
         attempts = 0;
         firstConnection = true;
-
         logger.info("Connects with {}.", channel);
-
         ctx.fireChannelActive();
     }
 

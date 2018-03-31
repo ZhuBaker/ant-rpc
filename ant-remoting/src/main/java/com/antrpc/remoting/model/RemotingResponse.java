@@ -87,7 +87,7 @@ public class RemotingResponse {
      * @throws InterruptedException
      */
     public RemotingTransporter waitResponse() throws InterruptedException {
-        this.countDownLatch.wait(this.timeoutMillis,TimeUnit.MILLISECONDS.ordinal());
+        this.countDownLatch.await(this.timeoutMillis,TimeUnit.MILLISECONDS);
         return this.remotingTransporter;
     }
 

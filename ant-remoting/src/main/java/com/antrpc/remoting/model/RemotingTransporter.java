@@ -131,6 +131,12 @@ public class RemotingTransporter extends ByteHolder {
     }
 
 
+    @Override
+    public String toString() {
+        return "RemotingTransporter [code=" + code + ", customHeader=" + customHead + ", timestamp=" + timestamp + ", opaque=" + opaque
+                + ", transporterType=" + transporterType + "]";
+    }
+
 
 
 }

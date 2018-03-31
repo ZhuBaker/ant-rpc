@@ -13,7 +13,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created with IntelliJ IDEA.
- * Description:
+ * Description: 使用protoStuff序列化
+ * 序列化的对象不需要实现java.io.Serializable 也不需要有默认的构造函数
  * User: zhubo
  * Date: 2018-03-31
  * Time: 11:05

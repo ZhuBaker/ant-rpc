@@ -172,7 +172,7 @@ public abstract class NettyRemotingBase {
                             rpcHook.doAfterResponse(ConnectionUtils.parseChannelRemoteAddr(ctx.channel()),remotingTransporter,response);
                         }
 
-                        if(null == response) {
+                        if(null != response) {
                             ctx.writeAndFlush(response).addListener(new ChannelFutureListener() {
                                 @Override
                                 public void operationComplete(ChannelFuture future) throws Exception {

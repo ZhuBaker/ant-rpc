@@ -33,8 +33,5 @@ public class RemotingTransporterEncoder extends MessageToByteEncoder<RemotingTra
                 .writeInt(body.length)                  // length
                 .writeByte(isCompress)                  // 是否压缩
                 .writeBytes(body);
-
     }
-
-
 }
