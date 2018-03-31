@@ -1,14 +1,20 @@
 package com.antrpc.remoting.netty;
 
 import com.antrpc.common.exception.remoting.RemotingException;
+import com.antrpc.common.exception.remoting.RemotingSendRequestException;
+import com.antrpc.common.exception.remoting.RemotingTimeoutException;
+import com.antrpc.common.util.Constants;
 import com.antrpc.common.util.NamedThreadFactory;
 import com.antrpc.common.util.NativeSupport;
+import com.antrpc.common.util.Pair;
 import com.antrpc.remoting.ConnectionUtils;
 import com.antrpc.remoting.NettyRemotingBase;
 import com.antrpc.remoting.RPCHook;
 import com.antrpc.remoting.model.NettyChannelInactiveProcessor;
 import com.antrpc.remoting.model.NettyRequestProcessor;
 import com.antrpc.remoting.model.RemotingTransporter;
+import com.antrpc.remoting.netty.decode.RemotingTransporterDecoder;
+import com.antrpc.remoting.netty.encode.RemotingTransporterEncoder;
 import com.antrpc.remoting.netty.idle.ConnectorIdleStateTrigger;
 import com.antrpc.remoting.watcher.ConnectionWatchdog;
 import io.netty.bootstrap.Bootstrap;
@@ -19,6 +25,7 @@ import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.DefaultThreadFactory;
@@ -140,7 +147,12 @@ public class NettyRemotingClient extends NettyRemotingBase implements RemotingCl
             @Override
             public ChannelHandler[] handlers(){
                 return new ChannelHandler[] {
-                        this
+                        this,
+                        new RemotingTransporterDecoder(),
+                        new RemotingTransporterEncoder(),
+                        new IdleStateHandler(0, Constants.WRITER_IDLE_TIME_SECONDS,0,TimeUnit.SECONDS),
+                        idleStateTrigger,
+                        new NettyClientHandler()
                 };
             }
         };
@@ -160,18 +172,105 @@ public class NettyRemotingClient extends NettyRemotingBase implements RemotingCl
 
     @Override
     public void shutdown() {
+        try {
+            this.timer.stop();
+            this.timer = null;
+            for (ChannelWrapper cw : this.channelTables.values()){
+                this.closeChannel(null,cw.getChannel());
+            }
+            this.channelTables.clear();
+            this.worker.shutdownGracefully();
+            if (this.defaultEventExecutorGroup != null) {
+                this.defaultEventExecutorGroup.shutdownGracefully();
+            }
+        }catch (Exception e){
+            logger.error("NettyRemotingClient shutdown exception, ", e);
+        }
+        if (this.publicExecutor != null) {
+            try {
+                this.publicExecutor.shutdown();
+            } catch (Exception e) {
+                logger.error("NettyRemotingClient shutdown exception, ", e);
+            }
+        }
+    }
 
+    private void closeChannel(String addr , Channel channel){
+        if(null == channel) {
+            return ;
+        }
+        final String addrRemote = null == addr ? ConnectionUtils.parseChannelRemoteAddr(channel) : addr;
+        try{
+            if(this.lockChannelTables.tryLock(LockTimeoutMillis,TimeUnit.MILLISECONDS) ){
+                try{
+                    boolean removeItemFromTable = true;
+                    final ChannelWrapper prevCW = this.channelTables.get(addrRemote);
+
+                    logger.info("closeChannel: begin close the channel[{}] Found: {}", addrRemote, (prevCW != null));
+                    if (null == prevCW) {
+                        logger.info("closeChannel: the channel[{}] has been removed from the channel table before", addrRemote);
+                        removeItemFromTable = false;
+                    } else if (prevCW.getChannel() != channel) {
+                        logger.info("closeChannel: the channel[{}] has been closed before, and has been created again, nothing to do.", addrRemote);
+                        removeItemFromTable = false;
+                    }
+                    if (removeItemFromTable) {
+                        this.channelTables.remove(addrRemote);
+                        logger.info("closeChannel: the channel[{}] was removed from channel table", addrRemote);
+                    }
+                    ConnectionUtils.closeChannel(channel);
+
+
+                }catch (Exception e){
+                    logger.error("closeChannel: close the channel exception", e);
+                }
+                finally {
+                    this.lockChannelTables.unlock();
+                }
+            }else {
+                logger.warn("closeChannel: try to lock channel table, but timeout, {}ms", LockTimeoutMillis);
+            }
+
+        }catch (InterruptedException e){
+            logger.error("closeChannel exception", e);
+        }
     }
 
     @Override
     public void registerRPCHook(RPCHook rpcHook) {
-
+        this.rpcHook = rpcHook;
     }
 
 
     @Override
     public RemotingTransporter invokeSync(String addr, RemotingTransporter request, long timeoutMillis) throws InterruptedException, RemotingException {
-        return null;
+        final Channel channel = this.getAndCreateChannel(addr);
+        if (channel != null && channel.isActive()) {
+            try {
+                // 回调前置钩子
+                if (this.rpcHook != null) {
+                    this.rpcHook.doBeforeRequest(addr, request);
+                }
+                // 有了channel，有了request，request中也有了请求的Request.Code和Topic值，那么就是万事具备了，channel.writeAndFlush(request)就OK了
+                RemotingTransporter response = this.invokeSyncImpl(channel, request, timeoutMillis);
+                // 后置回调钩子
+                if (this.rpcHook != null) {
+                    this.rpcHook.doAfterResponse(ConnectionUtils.parseChannelRemoteAddr(channel), request, response);
+                }
+                return response;
+            } catch (RemotingSendRequestException e) {
+                logger.warn("invokeSync: send request exception, so close the channel[{}]", addr);
+                this.closeChannel(addr, channel);
+                throw e;
+            } catch (RemotingTimeoutException e) {
+                logger.warn("invokeSync: wait response timeout exception, the channel[{}]", addr);
+                throw e;
+            }
+        } else {
+            // 如果该channel是不健康的(创建的时候也许是好的，放入到缓存table的时候也是好的，就是在用的时候，它不行了，尼玛，不好意思，就需要将你从table中移除掉)
+            this.closeChannel(addr, channel);
+            throw new RemotingException(addr + " connection exception");
+        }
     }
 
     public Channel getAndCreateChannel(final String addr) throws InterruptedException {
@@ -254,22 +353,48 @@ public class NettyRemotingClient extends NettyRemotingBase implements RemotingCl
 
     @Override
     public void registerProcessor(byte requestCode, NettyRequestProcessor processor, ExecutorService executor) {
-
+        ExecutorService executorThis = executor;
+        if (null == executor) {
+            executorThis = this.publicExecutor;
+        }
+        Pair<NettyRequestProcessor, ExecutorService> pair =
+                new Pair<NettyRequestProcessor, ExecutorService>(processor, executorThis);
+        this.processorTable.put(requestCode, pair);
     }
 
     @Override
     public void registerChannelInactiveProcessor(NettyChannelInactiveProcessor processor, ExecutorService executor) {
-
+        if (null == executor) {
+            executor = publicExecutor;
+        }
+        this.defaultChannelInactiveProcessor = new Pair<NettyChannelInactiveProcessor,ExecutorService>(processor,executor);
     }
 
     @Override
     public boolean isChannelWriteable(String addr) {
+        ChannelWrapper cw = this.channelTables.get(addr);
+        if(cw != null && cw.isOK()){
+            return cw.isWriteable();
+        }
         return false;
     }
 
     @Override
     public void setreconnect(boolean isReconnect) {
+        this.isReconnect = isReconnect;
+    }
 
+    class NettyClientHandler extends SimpleChannelInboundHandler<RemotingTransporter> {
+
+        @Override
+        protected void channelRead0(ChannelHandlerContext ctx, RemotingTransporter msg) throws Exception {
+            processMessageReceived(ctx, msg);
+        }
+
+        @Override
+        public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+            processChannelInactive(ctx);
+        }
     }
 
     class ChannelWrapper {

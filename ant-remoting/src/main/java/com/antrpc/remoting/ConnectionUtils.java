@@ -1,6 +1,8 @@
 package com.antrpc.remoting;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +43,19 @@ public class ConnectionUtils {
         InetSocketAddress isa = new InetSocketAddress(s[0], Integer.valueOf(s[1]));
         return isa;
     }
+
+    public static void closeChannel(Channel channel) {
+        final String addrRemote = parseChannelRemoteAddr(channel);
+        channel.close().addListener(new ChannelFutureListener() {
+            @Override
+            public void operationComplete(ChannelFuture future) throws Exception {
+                logger.info("closeChannel: close the connection to remote address[{}] result: {}", addrRemote,
+                        future.isSuccess());
+            }
+        });
+    }
+
+
 
 
 }

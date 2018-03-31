@@ -2,11 +2,11 @@ package com.antrpc.remoting.netty;
 
 import com.antrpc.common.exception.remoting.RemotingSendRequestException;
 import com.antrpc.common.exception.remoting.RemotingTimeoutException;
+import com.antrpc.common.util.Pair;
 import com.antrpc.remoting.model.NettyChannelInactiveProcessor;
 import com.antrpc.remoting.model.NettyRequestProcessor;
 import com.antrpc.remoting.model.RemotingTransporter;
 import io.netty.channel.Channel;
-import javafx.util.Pair;
 
 import java.util.concurrent.ExecutorService;
 
