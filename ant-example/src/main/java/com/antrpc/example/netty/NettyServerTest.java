@@ -5,7 +5,7 @@ import com.antrpc.common.serialization.SerializerHolder;
 import com.antrpc.remoting.model.NettyRequestProcessor;
 import com.antrpc.remoting.model.RemotingTransporter;
 import com.antrpc.remoting.netty.NettyServerConfig;
-import com.antrpc.remoting.netty.idle.NettyRemotingServer;
+import com.antrpc.remoting.netty.NettyRemotingServer;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.util.concurrent.Executors;
@@ -26,7 +26,6 @@ public class NettyServerTest {
         config.setListenPort(18001);
         NettyRemotingServer server = new NettyRemotingServer(config);
         server.registerProecessor(TEST, new NettyRequestProcessor() {
-
             @Override
             public RemotingTransporter processRequest(ChannelHandlerContext ctx, RemotingTransporter transporter) throws Exception {
                 transporter.setCustomHead(SerializerHolder.serializerImpl().readObject(transporter.getBytes(), TestCommonCustomBody.class));

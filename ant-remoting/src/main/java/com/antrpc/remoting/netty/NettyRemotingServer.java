@@ -1,4 +1,4 @@
-package com.antrpc.remoting.netty.idle;
+package com.antrpc.remoting.netty;
 
 import com.antrpc.common.exception.remoting.RemotingSendRequestException;
 import com.antrpc.common.exception.remoting.RemotingTimeoutException;
@@ -11,10 +11,9 @@ import com.antrpc.remoting.RPCHook;
 import com.antrpc.remoting.model.NettyChannelInactiveProcessor;
 import com.antrpc.remoting.model.NettyRequestProcessor;
 import com.antrpc.remoting.model.RemotingTransporter;
-import com.antrpc.remoting.netty.NettyServerConfig;
-import com.antrpc.remoting.netty.RemotingServer;
 import com.antrpc.remoting.netty.decode.RemotingTransporterDecoder;
 import com.antrpc.remoting.netty.encode.RemotingTransporterEncoder;
+import com.antrpc.remoting.netty.idle.AcceptorIdleStateTrigger;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.PooledByteBufAllocator;
