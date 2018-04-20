@@ -38,10 +38,10 @@ public class RemotingTransporterDecoder extends ReplayingDecoder<RemotingTranspo
                 checkMagic(in.readShort()); // MAGIC
                 checkpoint(State.HEADER_TYPE);
             case HEADER_TYPE :
-                header.setType(in.readByte());
+                header.setType(in.readByte());  // 区分是请求消息还是响应消息
                 checkpoint(State.HEADER_SIGN);
             case HEADER_SIGN:
-                header.setSign(in.readByte()); // 消息标志位
+                header.setSign(in.readByte()); // 消息标志位 区分是什么功能的消息类型
                 checkpoint(State.HEADER_ID);
             case HEADER_ID:
                 header.setId(in.readLong()); // 消息id
@@ -82,6 +82,12 @@ public class RemotingTransporterDecoder extends ReplayingDecoder<RemotingTranspo
     }
 
     enum State {
-        HEADER_MAGIC, HEADER_TYPE, HEADER_SIGN, HEADER_ID, HEADER_BODY_LENGTH,HEADER_COMPRESS, BODY
+        HEADER_MAGIC,//
+        HEADER_TYPE,//
+        HEADER_SIGN,//
+        HEADER_ID,//
+        HEADER_BODY_LENGTH,//
+        HEADER_COMPRESS,//
+        BODY//
     }
 }

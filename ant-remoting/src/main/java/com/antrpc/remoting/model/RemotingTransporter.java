@@ -120,6 +120,14 @@ public class RemotingTransporter extends ByteHolder {
         this.transporterType = transporterType;
     }
 
+    /**
+     *
+     * @param id 请求消息的唯一标识
+     * @param code
+     * @param type 设置该消息是 请求信息还是响应信息
+     * @param bytes
+     * @return
+     */
     public static RemotingTransporter newInstance(long id , byte code , byte type , byte[] bytes){
         RemotingTransporter remotingTransporter = new RemotingTransporter();
         remotingTransporter.setCode(code);
