@@ -54,7 +54,17 @@ public abstract class NettyRemotingBase {
             new HashMap<Byte, Pair<NettyRequestProcessor, ExecutorService>>(64);
 
 
-    //远程端的调用具体实现（通用）
+    /**
+     * 主动发送数据
+     * 远程端的调用具体实现（通用）
+     * @param channel
+     * @param request
+     * @param timeoutMillis
+     * @return
+     * @throws RemotingTimeoutException
+     * @throws RemotingSendRequestException
+     * @throws InterruptedException
+     */
     public RemotingTransporter invokeSyncImpl(final Channel channel,final RemotingTransporter request , final long timeoutMillis)
             throws RemotingTimeoutException , RemotingSendRequestException, InterruptedException {
         try{
@@ -102,6 +112,11 @@ public abstract class NettyRemotingBase {
 
     }
 
+    /**
+     * 请求处理器
+     * @param ctx
+     * @param msg
+     */
     protected void processMessageReceived(ChannelHandlerContext ctx , RemotingTransporter msg) {
         if(logger.isDebugEnabled()){
             logger.debug("channel [] received RemotingTransporter is [{}]",ctx.channel(),msg);
@@ -145,6 +160,7 @@ public abstract class NettyRemotingBase {
     }
 
     /**
+     * 请求处理器  针对于请求做出响应
      * 对于远程的请求消息做处理操作(发送请求)  这个方法未在responseTable中加入数据
      * @param ctx
      * @param remotingTransporter
@@ -205,6 +221,7 @@ public abstract class NettyRemotingBase {
 
 
     /**
+     * 对响应信息做处理
      * 对于请求响应 回来的信息做处理操作 (对接收多来的数据做数据处理)
      * @param ctx
      * @param remotingTransporter

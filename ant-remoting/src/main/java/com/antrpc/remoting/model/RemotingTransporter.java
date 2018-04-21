@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Created with IntelliJ IDEA.
- * Description:
+ * Description: 通用协议栈封装 code 代表业务代码 type 代表 请求或者响应类型
  * User: zhubo
  * Date: 2018-03-29
  * Time: 15:20
@@ -21,6 +21,7 @@ public class RemotingTransporter extends ByteHolder {
      * 例如该请求时用来订阅服务的，该请求是用来发布服务的等等
      * 假设 code == 1 代表是消费者订阅服务，则接收方注册中心接收到该对象的时候就会先获取该code,判断如果该code == 1 则走订阅服务的处理分支代码
      * 假设 code == 2 代表是提供者发布服务，则接收方注册中心接收到该对象的时候也会先获取该code，判断如果该code == 2 则走发布服务的处理分支代码
+     * 即 code 代表业务代码
      */
     private byte code;
 

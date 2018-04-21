@@ -32,7 +32,6 @@ import io.netty.util.concurrent.DefaultThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -145,11 +144,12 @@ public class NettyRemotingClient extends NettyRemotingBase implements RemotingCl
             @Override
             public ChannelHandler[] handlers(){
                 return new ChannelHandler[] {
-                        this,
+                        // this,
+                        // new IdleStateHandler(0, Constants.WRITER_IDLE_TIME_SECONDS,0,TimeUnit.SECONDS),
+                        new IdleStateHandler(0,10,0,TimeUnit.SECONDS),
+                        idleStateTrigger,
                         new RemotingTransporterDecoder(),
                         new RemotingTransporterEncoder(),
-                        new IdleStateHandler(0, Constants.WRITER_IDLE_TIME_SECONDS,0,TimeUnit.SECONDS),
-                        idleStateTrigger,
                         new NettyClientHandler()
                 };
             }

@@ -165,7 +165,7 @@ public class NettyRemotingServer extends NettyRemotingBase implements RemotingSe
             protected void initChannel(SocketChannel ch) throws Exception {
                 ch.pipeline().addLast(
                         defaultEventExecutorGroup,
-                        new IdleStateHandler(0, Constants.WRITER_IDLE_TIME_SECONDS,0, TimeUnit.SECONDS),
+                        new IdleStateHandler(Constants.READER_IDLE_TIME_SECONDS,0,0, TimeUnit.SECONDS),
                         idleStateTrigger,
                         new RemotingTransporterDecoder()
                         ,new RemotingTransporterEncoder()
