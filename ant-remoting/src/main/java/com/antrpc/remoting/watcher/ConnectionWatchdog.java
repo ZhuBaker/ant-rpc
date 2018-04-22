@@ -14,7 +14,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**
  * Created with IntelliJ IDEA.
- * Description:监控重连狗
+ * Description:监控重连狗,保证重连机制被多次加入到pipeline中所以用Sharable注解
  * User: zhubo
  * Date: 2018-03-30
  * Time: 10:05
