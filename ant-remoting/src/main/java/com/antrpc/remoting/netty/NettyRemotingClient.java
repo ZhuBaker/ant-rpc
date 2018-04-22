@@ -144,9 +144,9 @@ public class NettyRemotingClient extends NettyRemotingBase implements RemotingCl
             @Override
             public ChannelHandler[] handlers(){
                 return new ChannelHandler[] {
-                        // this,
-                        // new IdleStateHandler(0, Constants.WRITER_IDLE_TIME_SECONDS,0,TimeUnit.SECONDS),
-                        new IdleStateHandler(0,10,0,TimeUnit.SECONDS),
+                        this,
+                        new IdleStateHandler(0, Constants.WRITER_IDLE_TIME_SECONDS,0,TimeUnit.SECONDS),
+                        // new IdleStateHandler(0,10,0,TimeUnit.SECONDS),
                         idleStateTrigger,
                         new RemotingTransporterDecoder(),
                         new RemotingTransporterEncoder(),

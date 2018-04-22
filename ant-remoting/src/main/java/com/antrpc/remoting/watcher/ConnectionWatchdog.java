@@ -19,6 +19,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
  * Date: 2018-03-30
  * Time: 10:05
  */
+@ChannelHandler.Sharable
 public class ConnectionWatchdog extends ChannelInboundHandlerAdapter implements TimerTask , ChannelHandlerHolder {
 
     private static final Logger logger = LoggerFactory.getLogger(ConnectionWatchdog.class);
@@ -64,9 +65,11 @@ public class ConnectionWatchdog extends ChannelInboundHandlerAdapter implements 
                 remoteAddress = ctx.channel().remoteAddress();
                 firstConnection = false;
             }
+            //如果重连失败，则调用ChannelInactive方法，再次出发重连事件，一直尝试12次，如果失败则不再重连
             if (attempts < 12) {
                 attempts++;
             }
+            //重连的间隔时间会越来越长
             long timeout = 2 << attempts;
             logger.info("因为channel关闭所以讲进行重连~");
             timer.newTimeout(this, timeout, MILLISECONDS);
