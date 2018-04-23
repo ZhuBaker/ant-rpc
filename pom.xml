@@ -16,6 +16,7 @@
     <module>ant-remoting</module>
     <module>ant-common</module>
     <module>ant-example</module>
+    <module>ant-client</module>
   </modules>
 
   <properties>
