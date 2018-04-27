@@ -56,6 +56,7 @@ public interface Provider {
     Provider monitorAddress(String monitorAddress);
 
     /**
+     * 服务提供者发布要提供的服务，需要调用Provider的publishService的方法
      * 需要暴露的实例
      * @param obj
      */
