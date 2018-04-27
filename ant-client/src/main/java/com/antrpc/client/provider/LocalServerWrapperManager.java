@@ -28,8 +28,8 @@ import static net.bytebuddy.matcher.ElementMatchers.not;
  * Created with IntelliJ IDEA.
  *
  * @author: zhubo
- * @description: 服务提供者端本地服务的编织管理类 将某个方法编织成信息发送给registry
- * @time: 2018年04月24日
+ * @description: 服务提供者端本地服务的编织管理类 将某个方法编织成信息发送给registry （需要向注册中心发送数据的编织类）
+ * @time: 2018年04月26日
  * @modifytime:
  */
 public class LocalServerWrapperManager {
@@ -59,7 +59,7 @@ public class LocalServerWrapperManager {
 
                 //默认的编织对象
                 DefaultServiceWrapper defaultServiceWrapper = new DefaultServiceWrapper();
-
+                // 进行数据的组织,进行限流数据
                 List<ServiceWrapper> serviceWrappers = defaultServiceWrapper.provider(o).create();
 
                 if(null != serviceWrappers  && !serviceWrappers.isEmpty()){
@@ -91,13 +91,14 @@ public class LocalServerWrapperManager {
     /**
      * Created with IntelliJ IDEA.
      * @author: zhubo
-     * @description: provider端的接口
+     * @description: 取有 @RPCService 注解的方法进行编织
+     * 将对象编织ServiceWrapper,并将服务名称注册到{@link ProviderRegistryController#serviceFlowControllerManager}
      * @time: 2018-04-25
      * @modifytime:
      */
     class DefaultServiceWrapper implements ServiceWrapperWorker {
 
-        //全局拦截proxy
+        //全局拦截proxy  全局的服务提供者的代理
         private volatile ProviderProxyHandler globalProviderProxyHandler;
         //某个方法实例编织后的对象
         private Object serviceProvider;
@@ -135,9 +136,10 @@ public class LocalServerWrapperManager {
         /**
          * 获取对象所有的继承关系,直到Object.class
          * 获取每个类上方法声明
-         * 取有 @RPCService 注解的方法进行编织
-         *
-         * @return
+         * 对 @RPCService 注解的方法进行编织
+         * 将服务名称注册到限流容器中  {@link ProviderRegistryController#serviceFlowControllerManager} type : {@link ServiceFlowControllerManager }    (限制服务单位时间内调用次数的容器)
+         * 编织ServiceWrapper放到到服务容器中  {@link ProviderRegistryController#providerContainer}   type : {@link ServiceProviderContainer }        (服务编织后存放的容器)
+         * @return 一个对象编织好后的 {@link ServiceWrapper} 数组对象
          */
         @Override
         public List<ServiceWrapper> create() {

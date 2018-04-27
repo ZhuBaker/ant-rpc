@@ -33,7 +33,7 @@ public class DefaultProvider implements Provider {
     private NettyRemotingServer nettyRemotingServer;      // 等待被Consumer连接
     private NettyRemotingServer nettyRemotingVipServer;   // 等待被Consumer VIP连接
     private ProviderRegistryController providerController;// provider端向注册中心连接的业务逻辑的控制器
-    private ProviderRPCController providerRPCController;  // consumer端远程调用的核心控制器
+    private ProviderRPCController providerRPCController;  // consumer端远程调用的核心控制器（提供服务）
     private ExecutorService remotingExecutor;             // RPC调用的核心线程执行器
     private ExecutorService remotingVipExecutor; 		  // RPC调用VIP的核心线程执行器
     private Channel monitorChannel; 					  // 连接monitor端的channel

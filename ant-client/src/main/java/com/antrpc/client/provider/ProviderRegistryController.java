@@ -25,7 +25,9 @@ public class ProviderRegistryController {
     private ProviderMonitorController providerMonitorController;
     //本地服务编织服务管理
     private LocalServerWrapperManager localServerWrapperManager;
+    // 编织好后的ServiceWrapper容器
     private final ServiceProviderContainer providerContainer;
+    // 限流容器管理  限制每个服务单位时间(分钟)的调用次数的管理器
     private ServiceFlowControllerManager serviceFlowControllerManager = new ServiceFlowControllerManager();
 
     public ProviderRegistryController(DefaultProvider defaultProvider) {

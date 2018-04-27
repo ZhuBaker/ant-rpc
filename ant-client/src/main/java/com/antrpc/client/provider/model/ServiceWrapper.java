@@ -15,11 +15,11 @@ import java.util.List;
  */
 public class ServiceWrapper {
 
-    /**** 原生类 ****/
+    /**** 原生类对象实例 ****/
     private Object serviceProvider;
-    /**** 降级类  默认入参和方法名与原生类一样******/
+    /**** 降级类实例  默认入参和方法名与原生类一样******/
     private Object mockDegradeServiceProvider;
-    /****** 服务名 *****/
+    /****** 服务名 指定serviceName或者 methodName*****/
     private String serviceName;
     /****** 该系统的负责人 *******/
     private String responsiblityName;

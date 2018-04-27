@@ -9,7 +9,7 @@ import java.util.List;
  * Created with IntelliJ IDEA.
  *
  * @author: zhubo
- * @description:
+ * @description: 对象编织的工具类接口
  * @time: 2018年04月24日
  * @modifytime:
  */
