@@ -91,8 +91,10 @@ public class LocalServerWrapperManager {
     /**
      * Created with IntelliJ IDEA.
      * @author: zhubo
-     * @description: 取有 @RPCService 注解的方法进行编织
-     * 将对象编织ServiceWrapper,并将服务名称注册到{@link ProviderRegistryController#serviceFlowControllerManager}
+     * @description:
+     * 1.取有 @RPCService 注解的方法进行编织
+     * 2.将对象编织ServiceWrapper
+     * 3.将服务名称注册到{@link ProviderRegistryController#serviceFlowControllerManager}
      * @time: 2018-04-25
      * @modifytime:
      */
